@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Socket.IO chat</title>
+
+    <link rel="stylesheet" href="style.css">
+      
+  </head>
+
+  <body>
+    <h2 id="header">Chat app</h2>
+
+
+    <a href="/">Takaisin kauppaan</a> 
+  
+
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Kun käyttäjän sivu latautuu, häneltä kysytään nimi
+        // ja talletetaan user nimiseen muuttujaan.
+
+        var vastaus = window.confirm("Haluatko kirjautua asiakas numerolla palvelun nopeuttamiseksi?")
+        if (vastaus === true) {
+        var user = window.prompt("Anna asiakasnumerosi")
+      }
+        else {
+        var user = "Sniikki asiakas"
+      }
+
+      
+        const socket = io();
+        // Lähetetään tai "emitoidaan" 
+        // periaatteessa tavallinen chat viesti, ja tunniste on "chat message" mutta tässä
+        // kohtaa viestin sisältö on vasta että käyttäjä on liittynyt.
+        socket.emit('chat message', user + " liittyi keskusteluun.");
+
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+
+        form.addEventListener('submit', (e) => {
+        // Oletuksena formin submitointi päivittäisi selaimen. Nyt se estetään.
+          e.preventDefault();
+        if (input.value) {
+          // Kun formi on lähetetty emitoidaan palvelimelle viesti nimikkeellä "chat message"
+          // Nimike on emitissä 1. parametrina ja pilkun jälkeen 2. parametriksi muodostetaan viesti:
+            socket.emit('chat message', user + " kirjoitti: " + input.value);
+            input.value = '';
+            }
+        });
+
+        socket.on('chat message', (msg) => {
+        const item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+
+  </body>
+</html>
